@@ -8,6 +8,9 @@ import asyncio
 import logging
 import os
 
+HOST = os.environ.get("JUDGE_HOST", "localhost")
+PORT_NUMBER = int(os.environ.get("JUDGE_PORT", "8000"))
+
 def extract_json(s: str):
     """Robustly extracts the first complete JSON object from a string that may contain other text."""
     stack = []
