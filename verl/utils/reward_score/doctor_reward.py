@@ -19,16 +19,18 @@ _reward_call_counter = 0
 def _get_judge_model():
     global _judge_model, _judge_tokenizer
     if _judge_model is None:
-        # Ray clears CUDA_VISIBLE_DEVICES for workers without num_gpus.
-        # Restore from SLURM_JOB_GPUS and spread workers across GPUs by pid.
-        if not torch.cuda.is_available():
-            slurm_gpus = os.environ.get("SLURM_JOB_GPUS", "").split(",")
-            slurm_gpus = [g.strip() for g in slurm_gpus if g.strip()]
-            if slurm_gpus:
-                # Always use the last GPU to avoid competing with sglang's KV cache on GPU 0
-                chosen = slurm_gpus[-1]
-                os.environ["CUDA_VISIBLE_DEVICES"] = chosen
-                print(f"[JUDGE] pid={os.getpid()} -> CUDA_VISIBLE_DEVICES={chosen}", flush=True)
+        # Always pin judge to the last GPU so it doesn't compete with sglang on GPU 0.
+        # Ray workers may still have CUDA_VISIBLE_DEVICES set, so we override unconditionally.
+        slurm_gpus = [g.strip() for g in os.environ.get("SLURM_JOB_GPUS", "").split(",") if g.strip()]
+        visible = [g.strip() for g in os.environ.get("CUDA_VISIBLE_DEVICES", "").split(",") if g.strip()]
+        if slurm_gpus:
+            chosen = slurm_gpus[-1]
+            os.environ["CUDA_VISIBLE_DEVICES"] = chosen
+            print(f"[JUDGE] pid={os.getpid()} -> CUDA_VISIBLE_DEVICES={chosen} (SLURM_JOB_GPUS)", flush=True)
+        elif len(visible) > 1:
+            chosen = visible[-1]
+            os.environ["CUDA_VISIBLE_DEVICES"] = chosen
+            print(f"[JUDGE] pid={os.getpid()} -> CUDA_VISIBLE_DEVICES={chosen} (last of existing)", flush=True)
         device = "cuda" if torch.cuda.is_available() else "cpu"
         print(f"[JUDGE] Loading model on {device} (pid={os.getpid()})", flush=True)
         logger.info(f"Loading local judge model from {LOCAL_MODEL_PATH} on {device}")

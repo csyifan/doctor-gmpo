@@ -1,0 +1,48 @@
+# Requirements for Qwen3.5-9B + verl + GMPO/GRPO + sglang rollout
+# Tested on: CUDA 12.8, Python 3.10, A100/H100 80GB
+#
+# ---------- Core PyTorch stack ----------
+# Install from https://download.pytorch.org/whl/cu128
+# torch==2.8.0+cu128
+# torchvision==0.23.0+cu128
+# torchaudio==2.8.0+cu128
+#
+# ---------- Required Python packages (pip install) ----------
+transformers==4.57.1
+accelerate==1.12.0
+peft==0.18.1
+safetensors==0.7.0
+datasets
+hydra-core==1.3.2
+ray[default]==2.53.0
+sglang[all]==0.5.5.post3
+flashinfer-python==0.5.2
+flash-attn==2.8.3
+triton==3.4.0
+openai==2.6.1
+sentencepiece
+tiktoken
+codetiming
+dill
+pandas
+pyarrow>=19.0.0
+pybind11
+tensordict>=0.8.0,<=0.10.0,!=0.9.0
+torchdata
+wandb
+packaging>=20.0
+uvicorn
+fastapi
+tensorboard
+math_verify
+
+# ---------- CRITICAL for Qwen3_Next linear attention ----------
+# Without these, the model falls back to slow PyTorch ops and causes CPU OOM.
+# causal-conv1d must be built from source:
+#   pip install causal-conv1d
+# flash-linear-attention must be built from source:
+#   pip install git+https://github.com/fla-org/flash-linear-attention
+#
+# Or install together:
+#   pip install causal-conv1d
+#   pip install "flash_linear_attention @ git+https://github.com/fla-org/flash-linear-attention"
