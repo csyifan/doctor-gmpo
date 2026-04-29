@@ -8,6 +8,9 @@
 **/playground
 **/wandb
 
+# Claude Code local config
+.claude/
+
 /pyrightconfig.json
 
 # Byte-compiled / optimized / DLL files
