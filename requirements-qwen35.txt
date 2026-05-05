@@ -19,7 +19,7 @@ sglang[all]==0.5.5.post3
 flashinfer-python==0.5.2
 flash-attn==2.8.3
 triton==3.4.0
-openai==2.6.1
+openai==2.34.0
 sentencepiece
 tiktoken
 codetiming
